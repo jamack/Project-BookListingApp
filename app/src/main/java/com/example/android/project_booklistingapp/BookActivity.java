@@ -9,8 +9,10 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BookActivity extends AppCompatActivity
@@ -27,10 +29,20 @@ public class BookActivity extends AppCompatActivity
     private static final String LOG_TAG = BookActivity.class.getSimpleName();
 
     /**
+     * Reference to the {@link ListView}
+     */
+    private ListView mListView;
+
+    /**
+     * Reference to the {@link BookAdapter}
+     */
+    private BookAdapter mAdapter;
+
+    /**
      * Limit search results to this number.
      */
 
-    private static final int MAX_RESULTS = 10;
+    private static final int MAX_RESULTS = 20;
 
     /**
      * Reference to LoaderManager
@@ -62,15 +74,20 @@ public class BookActivity extends AppCompatActivity
      */
     private String mQueryString = null;
 
-    /**
-     * Reference to list of {@link Book} objects
-     */
-    private List<Book> mBooksList;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book);
+
+        // Store reference to the ListView
+        mListView = findViewById(R.id.list_view);
+
+        // Create new {@link com.example.android.project_booklistingapp.BookAdapter}.
+        // Provide a blank List to first create the adapter; this will be updated when data has loaded.
+        mAdapter = new BookAdapter(this, new ArrayList<Book>());
+
+        // Set adapter on the ListView
+        mListView.setAdapter(mAdapter);
 
         // Get reference to a loader manager instance
         loaderManager = getSupportLoaderManager();
@@ -127,6 +144,7 @@ public class BookActivity extends AppCompatActivity
             mFirstSearch = false;
             loaderManager.initLoader(1, null, this);
         } else if (!mFirstSearch) {
+            mAdapter.clear();
             loaderManager.restartLoader(1, null, this);
         }
     }
@@ -140,9 +158,13 @@ public class BookActivity extends AppCompatActivity
 
     @Override
     public void onLoadFinished(Loader<List<Book>> loader, List<Book> books) {
-        mBooksList = books;
-        Log.v(LOG_TAG, "In the onLoadFinished method; returned list of books: " + mBooksList.toString());
-        Log.v(LOG_TAG, "Book #1: " + mBooksList.get(0).getTitle());
+
+        Log.v(LOG_TAG, "In the onLoadFinished method; returned list of books: " + books.toString());
+        Log.v(LOG_TAG, "Book #1: " + books.get(0).getTitle());
+
+        if (books != null && !books.isEmpty()) {
+            mAdapter.addAll(books);
+        }
     }
 
     @Override
