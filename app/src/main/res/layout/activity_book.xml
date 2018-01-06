@@ -35,9 +35,20 @@
         android:id="@+id/empty_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="72dp"
         android:textAppearance="?android:textAppearanceMedium"
         android:text=""
         />
+
+    <!-- Displayed while data for user's book search is being fetched from the server -->
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/search_term"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="72dp"
+        android:visibility="gone"/>
 
 </RelativeLayout>

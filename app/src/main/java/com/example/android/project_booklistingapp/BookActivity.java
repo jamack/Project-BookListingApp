@@ -1,5 +1,8 @@
 package com.example.android.project_booklistingapp;
 
+import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
@@ -7,9 +10,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -40,6 +45,11 @@ public class BookActivity extends AppCompatActivity
     private TextView mEmptyView;
 
     /**
+     * Reference to the {@link android.widget.ProgressBar}
+     */
+    private ProgressBar mProgressBar;
+
+    /**
      * Reference to the {@link BookAdapter}
      */
     private BookAdapter mAdapter;
@@ -49,6 +59,11 @@ public class BookActivity extends AppCompatActivity
      */
 
     private static final int MAX_RESULTS = 20;
+
+    /**
+     * Reference to ConnectivityManager
+     */
+    private ConnectivityManager mConnectivityManager;
 
     /**
      * Reference to LoaderManager
@@ -80,6 +95,11 @@ public class BookActivity extends AppCompatActivity
      */
     private String mQueryString = null;
 
+    /**
+     * Store reference to InputManager
+     */
+    private InputMethodManager mInputManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -87,6 +107,9 @@ public class BookActivity extends AppCompatActivity
 
         // Store reference to the ListView
         mListView = findViewById(R.id.list_view);
+
+        // Store reference to the ProgressBar
+        mProgressBar = findViewById(R.id.progress_bar);
 
         // Store reference to the ListView's empty view
         mEmptyView = findViewById(R.id.empty_view);
@@ -100,6 +123,9 @@ public class BookActivity extends AppCompatActivity
 
         // Set adapter on the ListView
         mListView.setAdapter(mAdapter);
+
+        // Get reference to a ConnectivityManager instance
+        mConnectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
 
         // Get reference to a loader manager instance
         loaderManager = getSupportLoaderManager();
@@ -139,7 +165,37 @@ public class BookActivity extends AppCompatActivity
     private void fetchBooks(String userInput) {
         Log.v(LOG_TAG, "Entering fetchBooks method.");
 
-//        String queryString = "https://www.googleapis.com/books/v1/volumes?q=android&maxResults=2""
+        // Get instance of InputManager, if one doesn't already exist
+        if (mInputManager == null) {
+            mInputManager = (InputMethodManager) this.getSystemService(Context.INPUT_METHOD_SERVICE);
+        }
+        // Hide the keyboard, since search button has been pressed.
+        // (User can bring soft keyboard up again by tapping in the search term EditText for another search).
+        mInputManager.hideSoftInputFromWindow(this.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+
+        // Check whether there is network connectivity
+        NetworkInfo activeNetwork = mConnectivityManager.getActiveNetworkInfo();
+        boolean isConnected = activeNetwork != null &&
+                activeNetwork.isConnectedOrConnecting();
+
+        // If no network connection
+        if (!isConnected) {
+            // Clear out previous data
+            mAdapter.clear();
+
+            // Turn on empty view text
+            mEmptyView.setVisibility(View.VISIBLE);
+
+            // Set empty view text to show error message regarding network connectivity
+            mEmptyView.setText("No network connection.\n\nPlease check connection and try again.");
+            return;
+        } else {
+            mEmptyView.setVisibility(View.GONE);
+        }
+
+        // Display the ProgressBar while books are fetched
+        mProgressBar.setVisibility(View.VISIBLE);
+
         // Declare and initialize new StringBuilder with server protocol/domain/partial path
         StringBuilder queryStringBuilder = new StringBuilder("https://www.googleapis.com/books/v1/volumes?q=");
 
@@ -173,6 +229,9 @@ public class BookActivity extends AppCompatActivity
 
         Log.v(LOG_TAG, "In the onLoadFinished method; returned list of books: " + books.toString());
         Log.v(LOG_TAG, "Book #1: " + books.get(0).getTitle());
+
+        // Hide the ProgressBar so we can display either list of books or empty state message
+        mProgressBar.setVisibility(View.GONE);
 
         // TODO: USE THE FOLLOWING LINE FOR TESTING THE EMPTY VIEW. DELETE ONCE DONE.
         //books = null;
