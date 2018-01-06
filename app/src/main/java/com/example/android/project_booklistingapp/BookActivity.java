@@ -10,6 +10,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -32,6 +33,11 @@ public class BookActivity extends AppCompatActivity
      * Reference to the {@link ListView}
      */
     private ListView mListView;
+
+    /**
+     * Reference to the {@link ListView}'s empty view.
+     */
+    private TextView mEmptyView;
 
     /**
      * Reference to the {@link BookAdapter}
@@ -81,6 +87,12 @@ public class BookActivity extends AppCompatActivity
 
         // Store reference to the ListView
         mListView = findViewById(R.id.list_view);
+
+        // Store reference to the ListView's empty view
+        mEmptyView = findViewById(R.id.empty_view);
+
+        // Set empty view
+        mListView.setEmptyView(mEmptyView);
 
         // Create new {@link com.example.android.project_booklistingapp.BookAdapter}.
         // Provide a blank List to first create the adapter; this will be updated when data has loaded.
@@ -162,14 +174,21 @@ public class BookActivity extends AppCompatActivity
         Log.v(LOG_TAG, "In the onLoadFinished method; returned list of books: " + books.toString());
         Log.v(LOG_TAG, "Book #1: " + books.get(0).getTitle());
 
+        // TODO: USE THE FOLLOWING LINE FOR TESTING THE EMPTY VIEW. DELETE ONCE DONE.
+        //books = null;
+
         if (books != null && !books.isEmpty()) {
             mAdapter.addAll(books);
+        } else { // No data returned
+            // Set text to display message to user
+            mEmptyView.setText("No books found for topic.");
         }
     }
 
     @Override
     public void onLoaderReset(Loader<List<Book>> loader) {
-        // TODO: ADD CODE TO CLEAR OUT ADAPTER, ONCE I'VE CREATED THAT...
+        // Clear the data
+        mAdapter.clear();
     }
 
 }

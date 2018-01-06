@@ -27,7 +27,17 @@
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
         android:layout_below="@id/search_term">
-
     </ListView>
+
+    <!-- Text is initially an empty string so message does not display while data is loading.
+            Text will be updated programatically if search query does not return usable data. -->
+    <TextView
+        android:id="@+id/empty_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
+        android:textAppearance="?android:textAppearanceMedium"
+        android:text=""
+        />
 
 </RelativeLayout>
