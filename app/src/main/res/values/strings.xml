@@ -3,4 +3,7 @@
     <string name="search_term_hint">Enter search term...</string>
     <string name="search_button_text">Search</string>
     <string name="book_authors_unknown">Author(s) unknown.</string>
+    <string name="error_message_no_search_terms">Please enter a search term</string>
+    <string name="error_message_no_network_connection">No network connection.  Please check connection and try again.</string>
+    <string name="empty_message_no_books_found">No books found for topic.</string>
 </resources>

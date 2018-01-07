@@ -66,19 +66,26 @@ public class Book implements Parcelable {
         return mTitle;
     }
 
+    // TODO: IT APPEARS THAT TO EXTRACT STRING RESOURCES, I NEED A CONTEXT, WHICH WILL NEED TO BE PASSED
+    // TODO: FROM THE QUERYUTILS, WHICH WILL IN TURN NEED TO BE PASSED FROM THE CALLING ACTIVITY... WHEW!!
+
     /**
      * Getter method to return author(s)
      *
      * @return authors, as formatted string of one or more authors
      */
     public String getAuthors() {
-        // Store size of the uthors list
-        int numAuthors = mAuthors.size();
 
-        // Check that author(s) list is not null
+        // Check whether any authors are listed for book.
+        // If no authors (null), return message to that effect.
         if (mAuthors == null) {
             return "Author(s) unknown.";
-        } else if (numAuthors < 2) { // Check whether more than one author
+        }
+
+        // Store size of the authors list
+        int numAuthors = mAuthors.size();
+
+        if (numAuthors < 2) { // Check whether more than one author
             return mAuthors.get(0);
         }
 
@@ -112,7 +119,7 @@ public class Book implements Parcelable {
      * Write {@link Book}' data to a Parcelable that can be saved as part of an Activity's state
      *
      * @param parcel destination
-     * @param i flags
+     * @param i      flags
      */
     @Override
     public void writeToParcel(Parcel parcel, int i) {

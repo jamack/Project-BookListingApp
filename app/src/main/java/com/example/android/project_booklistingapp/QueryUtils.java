@@ -30,7 +30,6 @@ public final class QueryUtils {
     private static final String LOG_TAG = QueryUtils.class.getSimpleName();
 
     public static List<Book> extractBooks(String url) {
-        Log.v(LOG_TAG, "In extractBooks method.");
 
         // Reference to string for JSON query response (to be parsed)
         String queriedString;
@@ -43,7 +42,6 @@ public final class QueryUtils {
         URL formattedUrl;
         if (url != null && !url.isEmpty()) {
             formattedUrl = formatUrl(url);
-            Log.v(LOG_TAG, "In extractBooks method; just called formatUrl helper method.");
         } else {
             Log.e(LOG_TAG, "String passed into extractBooks method is either null or empty.");
             return null;
@@ -52,9 +50,6 @@ public final class QueryUtils {
 
         if (formattedUrl != null) {
             queriedString = makeHttpRequest(formattedUrl);
-//            Log.v(LOG_TAG, "In extractBooks method; just called makeHttpRequest helper method. " +
-//                    "The value the returned JSON data - in string format - is: " + queriedString);
-            Log.v(LOG_TAG, "In extractBooks method; just called makeHttpRequest helper method.");
         } else {
             Log.e(LOG_TAG, "URL object produced by extractBooks' formatUrl method is null.");
             return null;
@@ -83,18 +78,28 @@ public final class QueryUtils {
 
                     // Get the title
                     String title = volumeInfo.getString("title");
-                    Log.v(LOG_TAG,"Title of book #" + Integer.toString(i+1) + " is: " + title);
-                    // Get the author(s)
-                    JSONArray authorsJSON = volumeInfo.getJSONArray("authors");
 
-                    // Convert authors from JSONArray to an ArrayList that can be used in Book constructor
-                    List<String> authors = new ArrayList<>();
-                    for (int j = 0; j < authorsJSON.length(); j++) {
-                        authors.add(j, authorsJSON.getString(j));
-                        Log.v(LOG_TAG,"An author is: " + authorsJSON.getString(j));
+                    // Create new JSONArray to hold authors, if any
+                    JSONArray authorsJSON = new JSONArray();
+                    // If book has authors listed, get the author(s)
+                    if (volumeInfo.has("authors")) {
+                        authorsJSON = volumeInfo.getJSONArray("authors");
+                    } else { // If no authors listed for book, nullify the JSONArray
+                        authorsJSON = null;
                     }
 
-                    // TODO: ADD THE PARSED BOOK DATA TO THE LIST THAT WILL BE RETURNED
+                    // Create a list for authors
+                    List<String> authors = new ArrayList<>();
+                    // If a book has authors listed, convert authors from JSONArray to an ArrayList that can be used in Book constructor
+                    if (authorsJSON != null) {
+                        for (int j = 0; j < authorsJSON.length(); j++) {
+                            authors.add(j, authorsJSON.getString(j));
+                        }
+                    } else { // if no authors listed for book, nullify the authors list
+                        authors = null;
+                    }
+
+                    // Add parsed book data to the list that will be returned
                     books.add(new Book(title, authors));
                 }
 
@@ -103,25 +108,16 @@ public final class QueryUtils {
             }
         }
 
-        Log.v(LOG_TAG,"In extractBooks method; parsed server data and returning ArrayList books.");
         return books;
 
     }
 
-//    public static URL formatUrl(String url) {
-//        URL formattedURL;
-//        try {
-//            formattedURL = new URL(url);
-//        } catch (MalformedURLException e) {
-//            Log.e(LOG_TAG,"Cannot format provided string into a URL object...", e);
-//            return null;
-//        }
-//
-//        Log.v(LOG_TAG,"In formatUrl method; returning a URL of: " + formattedURL.toString());
-//        return formattedURL;
-//    }
-
-    // TODO: TESTING - MOVE THIS METHOD TO QUERYUTILS WHEN FINISHED...
+    /**
+     * Format the provided String into a URL.
+     *
+     * @param url in String format
+     * @return URL object. (Null if it cannot be properly formatted).
+     */
     public static URL formatUrl(String url) {
         // Reference to a URL object.
         URL formattedURL;
@@ -133,11 +129,15 @@ public final class QueryUtils {
             return null;
         }
 
-        Log.v(LOG_TAG, "In formatUrl method; returning a URL of: " + formattedURL.toString());
         return formattedURL;
     }
 
-    // TODO: TESTING - MOVE THIS METHOD TO QUERYUTILS WHEN FINISHED...
+    /**
+     * Attempt to open HTTP connection and retrieve data from the server
+     *
+     * @param queryUrl URL object with protocol/server/query data
+     * @return String of returned JSON data
+     */
     public static String makeHttpRequest(URL queryUrl) {
         // String to hold response. Initialized as an empty string.
         String jsonResponse = "";
@@ -194,7 +194,13 @@ public final class QueryUtils {
         return jsonResponse;
     }
 
-    // TODO: TESTING - MOVE THIS METHOD TO QUERYUTILS WHEN FINISHED...
+    /**
+     * Read an input stream, buffer it, and return a single String
+     *
+     * @param inputStream of character data
+     * @return String of buffered and compiled data
+     * @throws IOException to be caught by calling code
+     */
     public static String readFromStream(InputStream inputStream) throws IOException {
 
         // Create new StringBuilder object to hold server response
@@ -216,7 +222,6 @@ public final class QueryUtils {
             }
 
         }
-
 
         // Convert StringBuilder's content and return a final String
         return output.toString();

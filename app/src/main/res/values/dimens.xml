@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="margin_padding_normal">16dp</dimen>
+    <dimen name="margin_padding_half">8dp</dimen>
+    <dimen name="margin_padding_thin">4dp</dimen>
+    <dimen name="view_shift_down_typical">72dp</dimen>
+</resources>

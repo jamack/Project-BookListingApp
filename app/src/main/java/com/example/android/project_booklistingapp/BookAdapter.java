@@ -38,6 +38,14 @@ public class BookAdapter extends ArrayAdapter {
         this.mBookList = bookList;
     }
 
+    /**
+     * Takes a position from the ListView, reuses/inflates a View, and updates View with corresponding {@link Book} data
+     *
+     * @param position in the ListView
+     * @param convertView to be reused or inflated
+     * @param parent of the View
+     * @return View that's been prepared
+     */
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {

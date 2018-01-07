@@ -1,7 +1,6 @@
 package com.example.android.project_booklistingapp;
 
 import android.content.Context;
-import android.util.Log;
 
 import java.util.List;
 
@@ -9,7 +8,6 @@ import java.util.List;
  * Loader class - handles creating a list - on a background thread - of {@link Book} objects
  * that are fetched from a server, parsed, and added to a list.
  */
-
 public class BookLoader extends android.support.v4.content.AsyncTaskLoader {
 
     /** Tag for log/exception messages */
@@ -31,7 +29,6 @@ public class BookLoader extends android.support.v4.content.AsyncTaskLoader {
 
     @Override
     protected void onStartLoading() {
-        Log.v(LOG_TAG,"In the startLoading method...");
         forceLoad();
     }
 
@@ -42,7 +39,6 @@ public class BookLoader extends android.support.v4.content.AsyncTaskLoader {
      */
     @Override
     public List<Book> loadInBackground() {
-        Log.v(LOG_TAG, "In com.example.android.project_booklistingapp.BookLoader's loadInBackground method.");
         return QueryUtils.extractBooks(mQueryUrl);
     }
 

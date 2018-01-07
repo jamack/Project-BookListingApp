@@ -25,11 +25,6 @@ public class BookActivity extends AppCompatActivity
         implements LoaderManager.LoaderCallbacks<List<Book>> {
 
     /**
-     * TEST QUERY STRING
-     */
-    private static final String TEST_STRING = "https://www.googleapis.com/books/v1/volumes?q=android&maxResults=2";
-
-    /**
      * Tag for the log messages
      */
     private static final String LOG_TAG = BookActivity.class.getSimpleName();
@@ -42,8 +37,27 @@ public class BookActivity extends AppCompatActivity
     /**
      * Key for saving {@link List<Book>} books list state
      */
-
     private static final String BOOKS_LIST_STATE = "BOOKS_LIST_STATE";
+
+    /**
+     * Query string "space" character. Does not get translated.
+     */
+    private static final String QUERY_CHARACTER_SPACE = " ";
+
+    /**
+     * Query string "plus" character. Does not get translated.
+     */
+    private static final String QUERY_CHARACTER_PLUS = "+";
+
+    /**
+     * Query string "protocol, domain, and initial path" portion. Does not get translated.
+     */
+    private static final String QUERY_INITIALPATH = "https://www.googleapis.com/books/v1/volumes?q=";
+
+    /**
+     * Query string "max results" portion. Does not get translated.
+     */
+    private static final String QUERY_MAXRESULTS = "&maxResults=";
 
     /**
      * Reference to the {@link ListView}
@@ -143,7 +157,6 @@ public class BookActivity extends AppCompatActivity
         // If we've saved the ListView state previously (for example, upon orientation change),
         // restore that state.
         if (savedInstanceState != null && savedInstanceState.containsKey(LIST_VIEW_STATE)) {
-            Log.v(LOG_TAG, "In onCreate method; savedInstanceState is NOT null, so trying to restore ListView state...");
             // Restore previous state (scroll position, etc.)
             mListView.onRestoreInstanceState(savedInstanceState.getParcelable(LIST_VIEW_STATE));
         }
@@ -176,11 +189,10 @@ public class BookActivity extends AppCompatActivity
 
                 // Check whether entry is valid
                 if (!mSearchTerm.isEmpty()) {
-                    Log.v(LOG_TAG, "TEST: Retrieved text from the search field: " + mSearchTerm);
-                    fetchBooks(TEST_STRING);
+                    fetchBooks();
                 } else {
                     // Display toast notifying user to enter a search term before pressing button
-                    Toast toast = Toast.makeText(BookActivity.this, "Please enter a search term", Toast.LENGTH_SHORT);
+                    Toast toast = Toast.makeText(BookActivity.this, R.string.error_message_no_search_terms, Toast.LENGTH_SHORT);
                     toast.setGravity(Gravity.TOP, 0, 512);
                     toast.show();
                 }
@@ -192,11 +204,8 @@ public class BookActivity extends AppCompatActivity
      * Format a server query string from the user's input search term(s).
      * Create a new {@link BookLoader} to perform server operations on a background thread.
      * If additional searches, restart the {@link BookLoader} to get new data.
-     *
-     * @param userInput search term(s)
      */
-    private void fetchBooks(String userInput) {
-        Log.v(LOG_TAG, "Entering fetchBooks method.");
+    private void fetchBooks() {
 
         // Get instance of InputManager, if one doesn't already exist
         if (mInputManager == null) {
@@ -220,7 +229,7 @@ public class BookActivity extends AppCompatActivity
             mEmptyView.setVisibility(View.VISIBLE);
 
             // Set empty view text to show error message regarding network connectivity
-            mEmptyView.setText("No network connection.\n\nPlease check connection and try again.");
+            mEmptyView.setText(R.string.error_message_no_network_connection);
             return;
         } else {
             mEmptyView.setVisibility(View.GONE);
@@ -230,15 +239,15 @@ public class BookActivity extends AppCompatActivity
         mProgressBar.setVisibility(View.VISIBLE);
 
         // Declare and initialize new StringBuilder with server protocol/domain/partial path
-        StringBuilder queryStringBuilder = new StringBuilder("https://www.googleapis.com/books/v1/volumes?q=");
+        StringBuilder queryStringBuilder = new StringBuilder(QUERY_INITIALPATH);
 
         // Add search term(s) to path
         queryStringBuilder.append(mSearchTerm);
         // Add search criteria to path
-        queryStringBuilder.append("&maxResults=" + Integer.toString(MAX_RESULTS));
+        queryStringBuilder.append(QUERY_MAXRESULTS + Integer.toString(MAX_RESULTS));
 
         // Convert results to string. If any spaces between multiple search terms, replaces with needed "+" symbol.
-        mQueryString = queryStringBuilder.toString().replace(" ", "+");
+        mQueryString = queryStringBuilder.toString().replace(QUERY_CHARACTER_SPACE, QUERY_CHARACTER_PLUS);
 
         // Create a new loader if initial search, otherwise restart the loader with fresh search term(s)
         if (mFirstSearch) {
@@ -253,15 +262,11 @@ public class BookActivity extends AppCompatActivity
     // Create a new loader, including the user's search term(s)
     @Override
     public Loader<List<Book>> onCreateLoader(int id, Bundle args) {
-        Log.v(LOG_TAG, "In onCreateLoader method.");
         return new BookLoader(this, mQueryString);
     }
 
     @Override
     public void onLoadFinished(Loader<List<Book>> loader, List<Book> books) {
-
-        Log.v(LOG_TAG, "In the onLoadFinished method; returned list of books: " + books.toString());
-        Log.v(LOG_TAG, "Book #1 title: " + books.get(0).getTitle());
 
         // Hide the ProgressBar so we can display either list of books or empty state message
         mProgressBar.setVisibility(View.GONE);
@@ -272,7 +277,7 @@ public class BookActivity extends AppCompatActivity
             mBooks = books;
         } else { // No data returned
             // Set text to display message to user
-            mEmptyView.setText("No books found for topic.");
+            mEmptyView.setText(R.string.empty_message_no_books_found);
         }
     }
 
