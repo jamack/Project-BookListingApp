@@ -1,12 +1,15 @@
 package com.example.android.project_booklistingapp;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.List;
 
 /**
  * Contains data for a book.
  */
 
-public class Book {
+public class Book implements Parcelable{
 
     /**
      * Title of book
@@ -28,6 +31,23 @@ public class Book {
         this.mTitle = title;
         this.mAuthors = authors;
     }
+
+    protected Book(Parcel in) {
+        mTitle = in.readString();
+        mAuthors = in.createStringArrayList();
+    }
+
+    public static final Creator<Book> CREATOR = new Creator<Book>() {
+        @Override
+        public Book createFromParcel(Parcel in) {
+            return new Book(in);
+        }
+
+        @Override
+        public Book[] newArray(int size) {
+            return new Book[size];
+        }
+    };
 
     public String getTitle() {
         return mTitle;
@@ -63,5 +83,16 @@ public class Book {
         }
 
         return stringBuilder.toString();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(mTitle);
+        parcel.writeStringList(mAuthors);
     }
 }

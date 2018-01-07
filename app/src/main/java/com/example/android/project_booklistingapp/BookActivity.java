@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
@@ -100,6 +101,16 @@ public class BookActivity extends AppCompatActivity
      */
     private InputMethodManager mInputManager;
 
+    /**
+     * Store reference to {@link List} of {@link Book}
+     */
+    private List<Book> mBooks;
+
+    /**
+     * Store reference to ListView's state. (If we need to save it at any point).
+     */
+    private Parcelable mListViewState;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -111,15 +122,37 @@ public class BookActivity extends AppCompatActivity
         // Store reference to the ProgressBar
         mProgressBar = findViewById(R.id.progress_bar);
 
+
+        if (savedInstanceState != null && savedInstanceState.containsKey("BookListState")) {
+            mBooks = savedInstanceState.getParcelableArrayList("BookListState");
+            mAdapter = new BookAdapter(this, mBooks);
+        } else {
+            // Create new {@link com.example.android.project_booklistingapp.BookAdapter}.
+            // Provide a blank List to first create the adapter; this will be updated when data has loaded.
+            mAdapter = new BookAdapter(this, new ArrayList<Book>());
+        }
+
+        // TODO: TRY TO IMPLEMENT AN "EITHER/OR" SCENARIO WITH FINDING LISTVIEW (FIND OR RESTORE)
+        // If we've saved the ListView state previously (for example, upon orientation change),
+        // restore that state.
+        if (savedInstanceState != null && savedInstanceState.containsKey("ListViewState")) {
+            Log.v(LOG_TAG,"In onCreate method; savedInstanceState is NOT null, so trying to restore ListView state...");
+            // Restore previous state (including selected item index and scroll position)
+            mListViewState = savedInstanceState.getParcelable("ListViewState");
+            Log.v(LOG_TAG,"Value of ListViewState is: " + mListViewState.toString());
+            mListView.onRestoreInstanceState(mListViewState);
+            // Force redraw of ListView views
+            mListView.invalidateViews();
+        } else {
+            // Store reference to the ListView's empty view
+            mEmptyView = findViewById(R.id.empty_view);
+        }
+
         // Store reference to the ListView's empty view
         mEmptyView = findViewById(R.id.empty_view);
 
         // Set empty view
         mListView.setEmptyView(mEmptyView);
-
-        // Create new {@link com.example.android.project_booklistingapp.BookAdapter}.
-        // Provide a blank List to first create the adapter; this will be updated when data has loaded.
-        mAdapter = new BookAdapter(this, new ArrayList<Book>());
 
         // Set adapter on the ListView
         mListView.setAdapter(mAdapter);
@@ -228,7 +261,7 @@ public class BookActivity extends AppCompatActivity
     public void onLoadFinished(Loader<List<Book>> loader, List<Book> books) {
 
         Log.v(LOG_TAG, "In the onLoadFinished method; returned list of books: " + books.toString());
-        Log.v(LOG_TAG, "Book #1: " + books.get(0).getTitle());
+        Log.v(LOG_TAG, "Book #1 title: " + books.get(0).getTitle());
 
         // Hide the ProgressBar so we can display either list of books or empty state message
         mProgressBar.setVisibility(View.GONE);
@@ -238,6 +271,8 @@ public class BookActivity extends AppCompatActivity
 
         if (books != null && !books.isEmpty()) {
             mAdapter.addAll(books);
+
+            mBooks = books;
         } else { // No data returned
             // Set text to display message to user
             mEmptyView.setText("No books found for topic.");
@@ -250,4 +285,18 @@ public class BookActivity extends AppCompatActivity
         mAdapter.clear();
     }
 
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.v(LOG_TAG, "In the onSaveInstanceState method. TEST: first book's title is: " + mBooks.get(0).getTitle());
+//        // Save the ListView state (= includes scroll position) as a Parceble
+//        Parcelable mListViewState = mListView.onSaveInstanceState();
+//
+//        outState.putParcelable("ListViewState", mListViewState);
+
+//        ArrayList<Book> testCast = (ArrayList<Book>) mBooks;
+        outState.putParcelable("ListViewState", mListView.onSaveInstanceState());
+        outState.putParcelableArrayList("BookListState", (ArrayList<Book>) mBooks);
+
+    }
 }
