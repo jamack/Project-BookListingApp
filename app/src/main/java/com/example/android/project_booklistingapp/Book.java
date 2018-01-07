@@ -9,7 +9,7 @@ import java.util.List;
  * Contains data for a book.
  */
 
-public class Book implements Parcelable{
+public class Book implements Parcelable {
 
     /**
      * Title of book
@@ -32,11 +32,19 @@ public class Book implements Parcelable{
         this.mAuthors = authors;
     }
 
+    /**
+     * Reconstruct {@link Book} from a Parcelable
+     *
+     * @param in Parcelable with {@link Book}'s data
+     */
     protected Book(Parcel in) {
         mTitle = in.readString();
         mAuthors = in.createStringArrayList();
     }
 
+    /**
+     * Create new list of {@link Book} objects
+     */
     public static final Creator<Book> CREATOR = new Creator<Book>() {
         @Override
         public Book createFromParcel(Parcel in) {
@@ -49,12 +57,22 @@ public class Book implements Parcelable{
         }
     };
 
+    /**
+     * Getter method to return title
+     *
+     * @return title
+     */
     public String getTitle() {
         return mTitle;
     }
 
+    /**
+     * Getter method to return author(s)
+     *
+     * @return authors, as formatted string of one or more authors
+     */
     public String getAuthors() {
-        // Store size of the Authors list
+        // Store size of the uthors list
         int numAuthors = mAuthors.size();
 
         // Check that author(s) list is not null
@@ -90,6 +108,12 @@ public class Book implements Parcelable{
         return 0;
     }
 
+    /**
+     * Write {@link Book}' data to a Parcelable that can be saved as part of an Activity's state
+     *
+     * @param parcel destination
+     * @param i flags
+     */
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(mTitle);
