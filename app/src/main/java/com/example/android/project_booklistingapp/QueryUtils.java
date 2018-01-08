@@ -103,7 +103,6 @@ public final class QueryUtils {
 
                         // Create string to hold formatted author(s) info.
                         // Default text for no author data; to be overwritten if present.
-//                    String authors = "Author(s) unknown.";
                         String authors = context.getResources().getString(R.string.book_authors_unknown);
 
                         if (authorsJSON != null) {
@@ -119,13 +118,11 @@ public final class QueryUtils {
 
                                 // If more than 2 authors, add comma
                                 if (numAuthors > 2 && j != numAuthors - 1) {
-//                                stringBuilder.append(", ");
                                     stringBuilder.append(context.getResources().getString(R.string.book_authors_separator_comma));
                                 }
 
                                 // Check whether to add "and" before last item in list
                                 if (j == numAuthors - 2) {
-//                                stringBuilder.append(" and ");
                                     stringBuilder.append(context.getResources().getString(R.string.book_authors_also));
                                 }
                             }

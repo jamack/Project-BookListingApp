@@ -130,9 +130,16 @@ public class BookActivity extends AppCompatActivity
     private List<Book> mBooks;
 
 
+    /**
+     * Called when activity is created or resumed.
+     * Use to set up UI and initial resources.
+     *
+     * @param savedInstanceState {@link Bundle} if previous state (data & listview) has been saved.
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_book);
 
         // Store reference to the ListView
@@ -169,34 +176,48 @@ public class BookActivity extends AppCompatActivity
         // Set adapter on the ListView
         mListView.setAdapter(mAdapter);
 
-        // Get reference to a ConnectivityManager instance
-        mConnectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
-
         // Get reference to a loader manager instance
         loaderManager = getSupportLoaderManager();
 
         // Get references to search text & button, and store in global variables
         mSearchField = (EditText) findViewById(R.id.search_term);
         mSearchButton = (Button) findViewById(R.id.search_button);
+    }
+
+    /**
+     * Called when creating activity or when resuming if after onPause(), etc.
+     * Use to start services and listeners - or restart those that may have been
+     * previously released during onStop().
+     */
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // Get reference to a ConnectivityManager instance
+        if (mConnectivityManager == null) {
+            mConnectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        }
 
         // Set listener to detect when Search button is pressed
-        mSearchButton.setOnClickListener(new View.OnClickListener() {
-            // Code here executes on main thread after user presses button
-            public void onClick(View v) {
-                //  Retrieve entered text
-                mSearchTerm = mSearchField.getText().toString();
+        if (!mSearchButton.hasOnClickListeners()) {
+            mSearchButton.setOnClickListener(new View.OnClickListener() {
+                // Code here executes on main thread after user presses button
+                public void onClick(View v) {
+                    //  Retrieve entered text
+                    mSearchTerm = mSearchField.getText().toString();
 
-                // Check whether entry is valid
-                if (!mSearchTerm.isEmpty()) {
-                    fetchBooks();
-                } else {
-                    // Display toast notifying user to enter a search term before pressing button
-                    Toast toast = Toast.makeText(BookActivity.this, R.string.error_message_no_search_terms, Toast.LENGTH_SHORT);
-                    toast.setGravity(Gravity.TOP, 0, 512);
-                    toast.show();
+                    // Check whether entry is valid
+                    if (!mSearchTerm.isEmpty()) {
+                        fetchBooks();
+                    } else {
+                        // Display toast notifying user to enter a search term before pressing button
+                        Toast toast = Toast.makeText(BookActivity.this, R.string.error_message_no_search_terms, Toast.LENGTH_SHORT);
+                        toast.setGravity(Gravity.TOP, 0, 512);
+                        toast.show();
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 
     /**
@@ -302,5 +323,23 @@ public class BookActivity extends AppCompatActivity
             // Save the list of books into bundle
             outState.putParcelableArrayList(BOOKS_LIST_STATE, (ArrayList<Book>) mBooks);
         }
+    }
+
+    /**
+     * Called when activity is completely hidden from the user.
+     * Release resources that might cause memory leaks.
+     */
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        // Release the search button's onclicklistener
+        mSearchButton.setOnClickListener(null);
+
+        // Release reference to ConnectivityManager
+        mConnectivityManager = null;
+
+        // Release any reference to InputMethodManager
+        mInputManager = null;
     }
 }
