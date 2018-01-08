@@ -1,5 +1,6 @@
 package com.example.android.project_booklistingapp;
 
+import android.content.res.Resources;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -10,6 +11,11 @@ import java.util.List;
  */
 
 public class Book implements Parcelable {
+
+    /**
+     * Reference to system resources, for getting string resources
+     */
+    private static Resources mResources;
 
     /**
      * Title of book
@@ -66,9 +72,6 @@ public class Book implements Parcelable {
         return mTitle;
     }
 
-    // TODO: IT APPEARS THAT TO EXTRACT STRING RESOURCES, I NEED A CONTEXT, WHICH WILL NEED TO BE PASSED
-    // TODO: FROM THE QUERYUTILS, WHICH WILL IN TURN NEED TO BE PASSED FROM THE CALLING ACTIVITY... WHEW!!
-
     /**
      * Getter method to return author(s)
      *
@@ -76,9 +79,15 @@ public class Book implements Parcelable {
      */
     public String getAuthors() {
 
+        // Store reference to system resources, for getting string resources
+        mResources = Resources.getSystem();
+
         // Check whether any authors are listed for book.
         // If no authors (null), return message to that effect.
         if (mAuthors == null) {
+            // Getting string resource via the next line crashes the app
+            // return mResources.getString(R.string.book_authors_unknown);
+
             return "Author(s) unknown.";
         }
 
@@ -98,11 +107,16 @@ public class Book implements Parcelable {
 
             // If more than 2 authors, add comma
             if (numAuthors > 2 && i != numAuthors - 1) {
+                // Getting string resource via the next line crashes the app
+                // stringBuilder.append(mResources.getString(R.string.book_authors_separator_comma));
                 stringBuilder.append(", ");
             }
 
             // Check whether to add "and" before last item in list
             if (i == numAuthors - 2) {
+                // Getting string resource via the next line crashes the app
+                // stringBuilder.append(mResources.getString(R.string.book_authors_also));
+
                 stringBuilder.append(" and ");
             }
         }
