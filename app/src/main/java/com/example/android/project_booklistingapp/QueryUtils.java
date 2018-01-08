@@ -1,5 +1,6 @@
 package com.example.android.project_booklistingapp;
 
+import android.content.Context;
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -29,7 +30,16 @@ public final class QueryUtils {
      */
     private static final String LOG_TAG = QueryUtils.class.getSimpleName();
 
-    public static List<Book> extractBooks(String url) {
+    /**
+     * Takes a server query in string format, creates a {@link URL}, makes HTTP server connection,
+     * reads input stream, parses returned JSON data string, and saves data as a list of {@link Book} objects.
+     * Utilizes helper methods.
+     *
+     * @param context for getting string resources
+     * @param url     to fetch data
+     * @return {@link List<Book>} with title & author information
+     */
+    public static List<Book> extractBooks(Context context, String url) {
 
         // Reference to string for JSON query response (to be parsed)
         String queriedString;
@@ -64,44 +74,73 @@ public final class QueryUtils {
                 // Convert query string into a JSON objects containing books + other query data
                 JSONObject jsonQuery = new JSONObject(queriedString);
 
-                // Get the "items" array of books
-                JSONArray jsonBooks = jsonQuery.getJSONArray("items");
+                // Check that query has returned an array of "items" rather than "totalItems: 0"
+                if (jsonQuery.has("items")) {
 
-                // Loop through objects (books) in the array
-                for (int i = 0; i < jsonBooks.length(); i++) {
+                    // Get the "items" array of books
+                    JSONArray jsonBooks = jsonQuery.getJSONArray("items");
 
-                    // Get the object (book) at given index
-                    JSONObject book = jsonBooks.getJSONObject(i);
+                    // Loop through objects (books) in the array
+                    for (int i = 0; i < jsonBooks.length(); i++) {
 
-                    // Get the "volumeInfo" object for the book
-                    JSONObject volumeInfo = book.getJSONObject("volumeInfo");
+                        // Get the object (book) at given index
+                        JSONObject book = jsonBooks.getJSONObject(i);
 
-                    // Get the title
-                    String title = volumeInfo.getString("title");
+                        // Get the "volumeInfo" object for the book
+                        JSONObject volumeInfo = book.getJSONObject("volumeInfo");
 
-                    // Create new JSONArray to hold authors, if any
-                    JSONArray authorsJSON = new JSONArray();
-                    // If book has authors listed, get the author(s)
-                    if (volumeInfo.has("authors")) {
-                        authorsJSON = volumeInfo.getJSONArray("authors");
-                    } else { // If no authors listed for book, nullify the JSONArray
-                        authorsJSON = null;
-                    }
+                        // Get the title
+                        String title = volumeInfo.getString("title");
 
-                    // Create a list for authors
-                    List<String> authors = new ArrayList<>();
-                    // If a book has authors listed, convert authors from JSONArray to an ArrayList that can be used in Book constructor
-                    if (authorsJSON != null) {
-                        for (int j = 0; j < authorsJSON.length(); j++) {
-                            authors.add(j, authorsJSON.getString(j));
+                        // Create new JSONArray to hold authors, if any
+                        JSONArray authorsJSON = new JSONArray();
+                        // If book has authors listed, get the author(s)
+                        if (volumeInfo.has("authors")) {
+                            authorsJSON = volumeInfo.getJSONArray("authors");
+                        } else { // If no authors listed for book, nullify the JSONArray
+                            authorsJSON = null;
                         }
-                    } else { // if no authors listed for book, nullify the authors list
-                        authors = null;
-                    }
 
-                    // Add parsed book data to the list that will be returned
-                    books.add(new Book(title, authors));
+                        // Create string to hold formatted author(s) info.
+                        // Default text for no author data; to be overwritten if present.
+//                    String authors = "Author(s) unknown.";
+                        String authors = context.getResources().getString(R.string.book_authors_unknown);
+
+                        if (authorsJSON != null) {
+                            // Need to prepare a String from the List of authors
+                            StringBuilder stringBuilder = new StringBuilder();
+
+                            // Store size of the authors list
+                            int numAuthors = authorsJSON.length();
+
+                            // Loop through each author in the list and add to the StringBuilder
+                            for (int j = 0; j < numAuthors; j++) {
+                                stringBuilder.append(authorsJSON.get(j));
+
+                                // If more than 2 authors, add comma
+                                if (numAuthors > 2 && j != numAuthors - 1) {
+//                                stringBuilder.append(", ");
+                                    stringBuilder.append(context.getResources().getString(R.string.book_authors_separator_comma));
+                                }
+
+                                // Check whether to add "and" before last item in list
+                                if (j == numAuthors - 2) {
+//                                stringBuilder.append(" and ");
+                                    stringBuilder.append(context.getResources().getString(R.string.book_authors_also));
+                                }
+                            }
+
+                            authors = stringBuilder.toString();
+                        }
+
+                        // Add parsed book data to the list that will be returned
+                        books.add(new Book(title, authors));
+                    }
+                } else { // If JSON string from server does not contain "items", there is no book data to parse
+                    // Nullify books list
+                    books = null;
                 }
+
 
             } catch (JSONException e) {
                 Log.e(LOG_TAG, "Problem parsing data from JSON string.", e);
@@ -109,7 +148,6 @@ public final class QueryUtils {
         }
 
         return books;
-
     }
 
     /**
