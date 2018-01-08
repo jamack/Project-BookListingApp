@@ -39,7 +39,7 @@ public class BookLoader extends android.support.v4.content.AsyncTaskLoader {
      */
     @Override
     public List<Book> loadInBackground() {
-        return QueryUtils.extractBooks(mQueryUrl);
+        return QueryUtils.extractBooks(getContext(), mQueryUrl);
     }
 
 

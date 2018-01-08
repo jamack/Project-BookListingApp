@@ -1,11 +1,20 @@
 <resources>
+
+    <!-- App name to be displayed -->
     <string name="app_name">BookList</string>
+
+    <!-- For search functionality in xml layout -->
     <string name="search_term_hint">Enter search term...</string>
     <string name="search_button_text">Search</string>
-    <string name="error_message_no_search_terms">Please enter a search term</string>
+
+    <!-- Warning/error messages -->
+    <string name="error_message_no_search_terms">Please enter search term(s)</string>
     <string name="error_message_no_network_connection">No network connection.\n\nPlease check connection and try again.</string>
-    <string name="empty_message_no_books_found">No books found for topic.</string>
+    <string name="empty_message_no_books_found">No books found for topic.\n\nPlease update search term(s) and try again.</string>
+
+    <!-- For use in creating/saving author(s) field -->
     <string name="book_authors_unknown">Author(s) unknown.</string>
-    <string name="book_authors_separator_comma">,</string>
-    <string name="book_authors_also">and</string>
+    <string name="book_authors_separator_comma">,\u0020</string>
+    <string name="book_authors_also">\u0020and\u0020</string>
+
 </resources>

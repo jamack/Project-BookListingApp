@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
@@ -276,8 +275,9 @@ public class BookActivity extends AppCompatActivity
 
             mBooks = books;
         } else { // No data returned
-            // Set text to display message to user
+            // Set text to display message to user & make it visible
             mEmptyView.setText(R.string.empty_message_no_books_found);
+            mEmptyView.setVisibility(View.VISIBLE);
         }
     }
 
